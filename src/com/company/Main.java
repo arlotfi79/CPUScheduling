@@ -29,16 +29,49 @@ public class Main {
         var processes =
                 readFile("/home/arlotfi79/Programming/IntellijProjects/OperatingSystems_Fall2021/process_inputs.csv");
 
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("1. FCFS  2. RR  3. SJF  4. MLFQ");
+        System.out.print("Please Enter Your Choice: ");
+        int choice = scanner.nextInt();
 
-        var fcfs = new FirstComeFirstServe();
-        var xx = fcfs.schedule(processes);
-        System.out.println(xx.dequeue().toString());
-        System.out.println(xx.dequeue().toString());
-        System.out.println(xx.dequeue().toString());
-        System.out.println(xx.dequeue().toString());
-        System.out.println(xx.dequeue().toString());
-        System.out.println(fcfs.getTotalTime());
-        System.out.println(fcfs.getIdleTime());
+        switch (choice){
+            case 1 -> {
+                var fcfs = new FCFSAndSJF();
+                var result = fcfs.schedule(processes, Algorithms.FCFS);
+                System.out.println(result.dequeue().toString());
+                System.out.println(result.dequeue().toString());
+                System.out.println(result.dequeue().toString());
+                System.out.println(result.dequeue().toString());
+                System.out.println(result.dequeue().toString());
+                System.out.println("TotalTime: " + fcfs.getTotalTime());
+                System.out.println("IdleTime: " + fcfs.getIdleTime());
+                break;
+            }
+
+            case 2 -> {
+
+            }
+
+            case 3 -> {
+                var sjf = new FCFSAndSJF();
+                var result2 = sjf.schedule(processes, Algorithms.SJF);
+                System.out.println(result2.dequeue().toString());
+                System.out.println(result2.dequeue().toString());
+                System.out.println(result2.dequeue().toString());
+                System.out.println(result2.dequeue().toString());
+                System.out.println(result2.dequeue().toString());
+                System.out.println("TotalTime: " + sjf.getTotalTime());
+                System.out.println("IdleTime: " + sjf.getIdleTime());
+                break;
+            }
+
+            case 4 -> {
+
+            }
+
+            default -> throw new IllegalArgumentException("Illegal Choice. Please try again");
+        }
+
 
     }
 }

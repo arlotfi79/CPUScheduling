@@ -1,5 +1,8 @@
 package com.company;
 
+import com.company.Queue.Queue;
+
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,6 +19,7 @@ public class Process {
 
     // helper attributes
     private ProcessSituation runningProcessSituation;
+    private int remainingWorkTime; // SJF
     private int finishTime;
     private int lastUsed;
 
@@ -31,10 +35,28 @@ public class Process {
     public static void sortProcessByArrivalTime(List<Process> processes) {
         processes.sort(new Comparator<Process>() {
             @Override
-            public int compare(Process o1, Process o2) {
-                return Integer.compare(o1.arrivalTime, o2.arrivalTime);
+            public int compare(Process p1, Process p2) {
+                return Integer.compare(p1.arrivalTime, p2.arrivalTime);
             }
         });
+    }
+
+    public static void sortProcessByRemainingTime(Queue<Process> readyQueue) {
+        var processes = new ArrayList<Process>();
+
+        while (!readyQueue.isEmpty())
+            processes.add(readyQueue.dequeue());
+
+        processes.sort(new Comparator<Process>() {
+            @Override
+            public int compare(Process p1, Process p2) {
+                return Integer.compare(p1.getRemainingWorkTime(), p2.getRemainingWorkTime());
+            }
+        });
+
+        while (!processes.isEmpty())
+            readyQueue.enqueue(processes.remove(0));
+
     }
 
     @Override
@@ -133,5 +155,13 @@ public class Process {
 
     public void setLastUsed(int lastUsed) {
         this.lastUsed = lastUsed;
+    }
+
+    public int getRemainingWorkTime() {
+        return remainingWorkTime;
+    }
+
+    public void setRemainingWorkTime(int remainingWorkTime) {
+        this.remainingWorkTime = remainingWorkTime;
     }
 }
