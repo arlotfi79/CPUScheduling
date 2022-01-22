@@ -4,25 +4,23 @@ import com.company.Queue.Queue;
 
 import java.util.List;
 
-public class FCFSAndSJF extends AbstractBaseScheduler{
+public class RoundRobin extends AbstractBaseScheduler{
 
-    private void addingNewProcessesToReadyQueue(int counter, Algorithms algorithm) {
+    private void addingNewProcessesToReadyQueue(int counter) {
         while (true) {
             if (!newQueue.isEmpty() && ((Process) newQueue.first()).getArrivalTime() == counter) {
                 var process = (Process) newQueue.dequeue();
-
-                if (algorithm.equals(Algorithms.SJF)) // for SJF
-                    process.setRemainingWorkTime(process.getBurstTime1());
-
+                process.setRemainingWorkTime(process.getBurstTime1()-1);
                 readyQueue.enqueue(process);
             } else
                 break;
         }
     }
 
-    private void stopProcessOrEnterIo(int counter) {
+    private void stopProcessOrEnterIo(int counter, int timeQuantum) {
         if (!runningQueue.isEmpty()) {
-            if (((Process) runningQueue.first()).getFinishTime() == counter) {
+
+            if (((Process) runningQueue.first()).getRemainingWorkTime() == 0){
                 var process = (Process) runningQueue.dequeue();
 
                 switch (process.getRunningProcessSituation()) {
@@ -41,31 +39,41 @@ public class FCFSAndSJF extends AbstractBaseScheduler{
                     }
                     default -> throw new IllegalArgumentException("process is not in not running in burst mode");
                 }
+
+            }
+
+            else {
+                if (((Process) runningQueue.first()).getCurrentTimeQuantum() == timeQuantum) {
+                    var process = (Process) runningQueue.dequeue();
+                    process.setRemainingWorkTime(process.getRemainingWorkTime() - 1);
+                    process.setLastUsed(counter);
+                    process.setCurrentTimeQuantum(1);
+                    readyQueue.enqueue(process);
+                } else{
+                    var process = (Process) runningQueue.first();
+                    process.setCurrentTimeQuantum(process.getCurrentTimeQuantum()+1);
+                    process.setRemainingWorkTime(process.getRemainingWorkTime() - 1);
+                }
             }
         }
     }
 
-    private void checkIfIoIsFinished(int counter, Algorithms algorithm) {
-        while (true) {
-            if (!ioQueue.isEmpty() && ((Process) ioQueue.first()).getFinishTime() == counter) {
+    private void checkIfIoIsFinished(int counter) {
+        while (true){
+            if (!ioQueue.isEmpty() && ((Process) ioQueue.first()).getFinishTime() == counter){
                 var process = (Process) ioQueue.dequeue();
 
-                if (process.getRunningProcessSituation().equals(ProcessSituation.IO)) {
-
-                    if (algorithm.equals(Algorithms.SJF)) // for SJF
-                        process.setRemainingWorkTime(process.getBurstTime2());
-
+                if (process.getRunningProcessSituation().equals(ProcessSituation.IO)){
+                    process.setRemainingWorkTime(process.getBurstTime2()-1);
                     readyQueue.enqueue(process);
                 }
-            } else
+            }
+            else
                 break;
         }
     }
 
-    private void checkWhichCpuBurstTimeToRun(int counter, Algorithms algorithm) {
-        // if SJF -> we should order the queue based on minimum remaining time for each process
-        if (readyQueue.size() > 1 && algorithm.equals(Algorithms.SJF))
-            Process.sortProcessByRemainingTime(readyQueue);
+    private void checkWhichCpuBurstTimeToRun(int counter) {
 
         if (runningQueue.isEmpty() && !readyQueue.isEmpty()) {
             var process = (Process) readyQueue.dequeue();
@@ -73,28 +81,37 @@ public class FCFSAndSJF extends AbstractBaseScheduler{
             switch (process.getRunningProcessSituation()) {
                 case FirstTime -> {
                     process.setRunningProcessSituation(ProcessSituation.CPU1);
-                    process.setFinishTime(counter + process.getBurstTime1());
+                    process.setRemainingWorkTime(process.getBurstTime1()-1);
                     process.setResponseTime(counter - process.getArrivalTime());
                     process.setWaitingTime(counter - process.getArrivalTime());
+                    process.setCurrentTimeQuantum(1); // because we count from 0 in our main loop
                     runningQueue.enqueue(process);
                     break;
                 }
 
                 case IO -> {
                     process.setRunningProcessSituation(ProcessSituation.CPU2);
-                    process.setFinishTime(counter + process.getBurstTime2());
+                    process.setRemainingWorkTime(process.getBurstTime2()-1);
                     process.setWaitingTime(process.getWaitingTime() + counter - process.getLastUsed());
+                    process.setCurrentTimeQuantum(1); // because we count from 0 in our main loop
                     runningQueue.enqueue(process);
                     break;
                 }
 
-                default -> throw new IllegalArgumentException("process not in a situation to be in CPU burst 1 or 2");
+                case CPU1, CPU2 -> {
+                    process.setWaitingTime(process.getWaitingTime() + counter - process.getLastUsed());
+                    process.setCurrentTimeQuantum(1); // because we count from 0 in our main loop
+                    runningQueue.enqueue(process);
+                    break;
+                }
+
+                default -> throw new IllegalArgumentException("process not in the right situation to run");
             }
         }
     }
 
 
-    public Queue<Process> schedule(List<Process> processes, Algorithms algorithm) {
+    public Queue<Process> schedule(List<Process> processes, int timeQuantum) {
         Process.sortProcessByArrivalTime(processes);
 
         for (Process process : processes) {
@@ -105,16 +122,16 @@ public class FCFSAndSJF extends AbstractBaseScheduler{
         while (true) {
 
             // 1. adding to ready queue
-            addingNewProcessesToReadyQueue(counter, algorithm);
+            addingNewProcessesToReadyQueue(counter);
 
             // 2. stopping process or entering IO
-            stopProcessOrEnterIo(counter);
+            stopProcessOrEnterIo(counter, timeQuantum);
 
             // 3. checking if we need to put it on ready queue
-            checkIfIoIsFinished(counter, algorithm);
+            checkIfIoIsFinished(counter);
 
             // 4. checking to run which CPU burst time
-            checkWhichCpuBurstTimeToRun(counter, algorithm);
+            checkWhichCpuBurstTimeToRun(counter);
 
             // 5. check if we have a running process or not
             if (runningQueue.isEmpty())

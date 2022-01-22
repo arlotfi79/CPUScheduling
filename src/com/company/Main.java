@@ -26,8 +26,14 @@ public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
 
+//        System.out.println("New-> " + newQueue.toString());
+//        System.out.println("Ready-> " + readyQueue.toString());
+//        System.out.println("IO-> " + ioQueue.toString());
+//        System.out.println("Running-> " + runningQueue.toString());
+//        System.out.println("Finished-> " + finishedQueue.toString());
+
         var processes =
-                readFile("/home/arlotfi79/Programming/IntellijProjects/OperatingSystems_Fall2021/process_inputs.csv");
+                readFile("process_inputs.csv");
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("1. FCFS  2. RR  3. SJF  4. MLFQ");
@@ -38,6 +44,7 @@ public class Main {
             case 1 -> {
                 var fcfs = new FCFSAndSJF();
                 var result = fcfs.schedule(processes, Algorithms.FCFS);
+                System.out.println("\n=========== FCFS ===========");
                 System.out.println(result.dequeue().toString());
                 System.out.println(result.dequeue().toString());
                 System.out.println(result.dequeue().toString());
@@ -49,12 +56,24 @@ public class Main {
             }
 
             case 2 -> {
+                var roundRobin = new RoundRobin();
+                var result = roundRobin.schedule(processes, 5);
+                System.out.println("\n=========== RR ===========");
+                System.out.println(result.dequeue().toString());
+                System.out.println(result.dequeue().toString());
+                System.out.println(result.dequeue().toString());
+                System.out.println(result.dequeue().toString());
+                System.out.println(result.dequeue().toString());
+                System.out.println("TotalTime: " + roundRobin.getTotalTime());
+                System.out.println("IdleTime: " + roundRobin.getIdleTime());
+                break;
 
             }
 
             case 3 -> {
                 var sjf = new FCFSAndSJF();
                 var result2 = sjf.schedule(processes, Algorithms.SJF);
+                System.out.println("\n=========== SJF ===========");
                 System.out.println(result2.dequeue().toString());
                 System.out.println(result2.dequeue().toString());
                 System.out.println(result2.dequeue().toString());

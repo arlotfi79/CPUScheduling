@@ -19,7 +19,8 @@ public class Process {
 
     // helper attributes
     private ProcessSituation runningProcessSituation;
-    private int remainingWorkTime; // SJF
+    private int remainingWorkTime; // SJF & RR
+    private int currentTimeQuantum;
     private int finishTime;
     private int lastUsed;
 
@@ -101,26 +102,6 @@ public class Process {
         return turnAroundTime;
     }
 
-    public void setProcessID(int processID) {
-        this.processID = processID;
-    }
-
-    public void setArrivalTime(int arrivalTime) {
-        this.arrivalTime = arrivalTime;
-    }
-
-    public void setBurstTime1(int burstTime1) {
-        this.burstTime1 = burstTime1;
-    }
-
-    public void setIoTime(int ioTime) {
-        this.ioTime = ioTime;
-    }
-
-    public void setBurstTime2(int burstTime2) {
-        this.burstTime2 = burstTime2;
-    }
-
     public void setWaitingTime(int waitingTime) {
         this.waitingTime = waitingTime;
     }
@@ -163,5 +144,13 @@ public class Process {
 
     public void setRemainingWorkTime(int remainingWorkTime) {
         this.remainingWorkTime = remainingWorkTime;
+    }
+
+    public int getCurrentTimeQuantum() {
+        return currentTimeQuantum;
+    }
+
+    public void setCurrentTimeQuantum(int currentTimeQuantumLeft) {
+        this.currentTimeQuantum = currentTimeQuantumLeft;
     }
 }
