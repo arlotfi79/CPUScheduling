@@ -9,10 +9,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    public static void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-    }
 
     private static List<Process> readFile(String fileName) throws FileNotFoundException {
         File inputs = new File(fileName);
@@ -103,7 +99,7 @@ public class Main {
             totalTurnAroundTime += process.getTurnAroundTime();
 
             System.out.format(processFormat, process.getProcessID(), process.getStartTime(), process.getTurnAroundTime(),
-                    process.getTurnAroundTime(), process.getResponseTime(), process.getWaitingTime());
+                    process.getTurnAroundTime()-process.getStartTime(), process.getResponseTime(), process.getWaitingTime());
             count++;
         }
         System.out.format("+------------+-----------+------------------+---------------+--------------+%n");
@@ -116,7 +112,5 @@ public class Main {
         System.out.format("\nCPU Utilization: %-4.2f", (float)(totalTime-idleTime)/totalTime);
         System.out.format("\nThroughput: %-4.2f", (float) (count*1000)/totalTime);
         System.out.println();
-
-
     }
 }
