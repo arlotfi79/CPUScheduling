@@ -4,5 +4,5 @@ public enum Algorithms {
     FCFS,
     SJF,
     RR,
-    MULTI
+    MLFQ,
 }

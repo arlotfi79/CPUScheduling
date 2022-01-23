@@ -6,6 +6,12 @@ import java.util.List;
 
 public class RoundRobin extends AbstractBaseScheduler{
 
+    private Queue transferToNextQueue = new Queue<Process>(5);
+
+    public Queue getTransferToNextQueue() {
+        return transferToNextQueue;
+    }
+
     private void addingNewProcessesToReadyQueue(int counter) {
         while (true) {
             if (!newQueue.isEmpty() && ((Process) newQueue.first()).getArrivalTime() == counter) {
@@ -17,7 +23,7 @@ public class RoundRobin extends AbstractBaseScheduler{
         }
     }
 
-    private void stopProcessOrEnterIo(int counter, int timeQuantum) {
+    private void stopProcessOrEnterIo(int counter, Algorithms algorithm, int timeQuantum) {
         if (!runningQueue.isEmpty()) {
 
             if (((Process) runningQueue.first()).getRemainingWorkTime() == 0){
@@ -48,7 +54,11 @@ public class RoundRobin extends AbstractBaseScheduler{
                     process.setRemainingWorkTime(process.getRemainingWorkTime() - 1);
                     process.setLastUsed(counter);
                     process.setCurrentTimeQuantum(1);
-                    readyQueue.enqueue(process);
+
+                    if (algorithm.equals(Algorithms.RR))
+                        readyQueue.enqueue(process);
+                    else if (algorithm.equals(Algorithms.MLFQ))
+                        transferToNextQueue.enqueue(process);
                 } else{
                     var process = (Process) runningQueue.first();
                     process.setCurrentTimeQuantum(process.getCurrentTimeQuantum()+1);
@@ -81,6 +91,7 @@ public class RoundRobin extends AbstractBaseScheduler{
             switch (process.getRunningProcessSituation()) {
                 case FirstTime -> {
                     process.setRunningProcessSituation(ProcessSituation.CPU1);
+                    process.setStartTime(counter);
                     process.setRemainingWorkTime(process.getBurstTime1()-1);
                     process.setResponseTime(counter - process.getArrivalTime());
                     process.setWaitingTime(counter - process.getArrivalTime());
@@ -110,22 +121,20 @@ public class RoundRobin extends AbstractBaseScheduler{
         }
     }
 
-
-    public Queue<Process> schedule(List<Process> processes, int timeQuantum) {
+    public Queue<Process> schedule(List<Process> processes, int timeQuantum, Algorithms algorithm, int counter) {
         Process.sortProcessByArrivalTime(processes);
 
         for (Process process : processes) {
             newQueue.enqueue(process);
         }
 
-        int counter = 0; // works as the current time of the program
-        while (true) {
 
+        while (true) {
             // 1. adding to ready queue
             addingNewProcessesToReadyQueue(counter);
 
             // 2. stopping process or entering IO
-            stopProcessOrEnterIo(counter, timeQuantum);
+            stopProcessOrEnterIo(counter, algorithm, timeQuantum);
 
             // 3. checking if we need to put it on ready queue
             checkIfIoIsFinished(counter);

@@ -73,6 +73,7 @@ public class FCFSAndSJF extends AbstractBaseScheduler{
             switch (process.getRunningProcessSituation()) {
                 case FirstTime -> {
                     process.setRunningProcessSituation(ProcessSituation.CPU1);
+                    process.setStartTime(counter);
                     process.setFinishTime(counter + process.getBurstTime1());
                     process.setResponseTime(counter - process.getArrivalTime());
                     process.setWaitingTime(counter - process.getArrivalTime());
@@ -93,15 +94,13 @@ public class FCFSAndSJF extends AbstractBaseScheduler{
         }
     }
 
-
-    public Queue<Process> schedule(List<Process> processes, Algorithms algorithm) {
+    public Queue<Process> schedule(List<Process> processes, Algorithms algorithm, int counter) {
         Process.sortProcessByArrivalTime(processes);
 
         for (Process process : processes) {
             newQueue.enqueue(process);
         }
 
-        int counter = 0; // works as the current time of the program
         while (true) {
 
             // 1. adding to ready queue

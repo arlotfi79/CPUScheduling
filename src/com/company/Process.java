@@ -16,6 +16,7 @@ public class Process {
     private int waitingTime;
     private int responseTime;
     private int turnAroundTime;
+    private int startTime;
 
     // helper attributes
     private ProcessSituation runningProcessSituation;
@@ -152,5 +153,13 @@ public class Process {
 
     public void setCurrentTimeQuantum(int currentTimeQuantumLeft) {
         this.currentTimeQuantum = currentTimeQuantumLeft;
+    }
+
+    public int getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(int startTime) {
+        this.startTime = startTime;
     }
 }
