@@ -15,7 +15,7 @@ public class Process {
 
     private int waitingTime;
     private int responseTime;
-    private int turnAroundTime;
+    private int endTime;
     private int startTime;
 
     // helper attributes
@@ -66,7 +66,7 @@ public class Process {
         return "Process{" +
                 "processID=" + processID +
                 ", responseTime=" + responseTime +
-                ", turnAroundTime=" + turnAroundTime +
+                ", turnAroundTime=" + endTime +
                 ", waitingTime=" + waitingTime +
                 '}';
     }
@@ -99,8 +99,8 @@ public class Process {
         return responseTime;
     }
 
-    public int getTurnAroundTime() {
-        return turnAroundTime;
+    public int getEndTime() {
+        return endTime;
     }
 
     public void setWaitingTime(int waitingTime) {
@@ -111,8 +111,8 @@ public class Process {
         this.responseTime = responseTime;
     }
 
-    public void setTurnAroundTime(int turnAroundTime) {
-        this.turnAroundTime = turnAroundTime;
+    public void setEndTime(int endTime) {
+        this.endTime = endTime;
     }
 
     public ProcessSituation getRunningProcessSituation() {

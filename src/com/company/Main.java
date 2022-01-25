@@ -96,10 +96,10 @@ public class Main {
             var process = output.dequeue();
             totalWaitingTime += process.getWaitingTime();
             totalResponseTime += process.getResponseTime();
-            totalTurnAroundTime += process.getTurnAroundTime();
+            totalTurnAroundTime += process.getEndTime();
 
-            System.out.format(processFormat, process.getProcessID(), process.getStartTime(), process.getTurnAroundTime(),
-                    process.getTurnAroundTime()-process.getStartTime(), process.getResponseTime(), process.getWaitingTime());
+            System.out.format(processFormat, process.getProcessID(), process.getStartTime(), process.getEndTime(),
+                    process.getEndTime()-process.getArrivalTime(), process.getResponseTime(), process.getWaitingTime());
             count++;
         }
         System.out.format("+------------+-----------+------------------+---------------+--------------+%n");

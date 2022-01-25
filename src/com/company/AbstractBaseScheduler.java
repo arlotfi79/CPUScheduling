@@ -30,4 +30,8 @@ public abstract class AbstractBaseScheduler {
     public int getIdleTime() {
         return idleTime;
     }
+
+    public Queue getReadyQueue() {
+        return readyQueue;
+    }
 }

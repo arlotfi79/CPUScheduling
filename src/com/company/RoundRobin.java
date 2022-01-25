@@ -39,7 +39,7 @@ public class RoundRobin extends AbstractBaseScheduler{
                     }
                     case CPU2 -> {
                         process.setRunningProcessSituation(ProcessSituation.FINISHED);
-                        process.setTurnAroundTime(counter);
+                        process.setEndTime(counter);
                         finishedQueue.enqueue(process);
                         break;
                     }
