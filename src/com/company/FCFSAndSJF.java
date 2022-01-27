@@ -27,10 +27,17 @@ public class FCFSAndSJF extends AbstractBaseScheduler{
 
                 switch (process.getRunningProcessSituation()) {
                     case CPU1 -> {
-                        process.setRunningProcessSituation(ProcessSituation.IO);
-                        process.setFinishTime(counter + process.getIoTime());
-                        process.setLastUsed(counter + process.getIoTime());
-                        ioQueue.enqueue(process);
+                        if (process.getIoTime() == 0){
+                            process.setRunningProcessSituation(ProcessSituation.CPU2);
+                            process.setFinishTime(counter + process.getBurstTime2());
+                            process.setWaitingTime(process.getWaitingTime() + counter - process.getLastUsed());
+                            runningQueue.enqueue(process);
+                        } else {
+                            process.setRunningProcessSituation(ProcessSituation.IO);
+                            process.setFinishTime(counter + process.getIoTime());
+                            process.setLastUsed(counter + process.getIoTime());
+                            ioQueue.enqueue(process);
+                        }
                         break;
                     }
                     case CPU2 -> {
@@ -72,12 +79,20 @@ public class FCFSAndSJF extends AbstractBaseScheduler{
 
             switch (process.getRunningProcessSituation()) {
                 case FirstTime -> {
-                    process.setRunningProcessSituation(ProcessSituation.CPU1);
-                    process.setStartTime(counter);
-                    process.setFinishTime(counter + process.getBurstTime1());
-                    process.setResponseTime(counter - process.getArrivalTime());
-                    process.setWaitingTime(counter - process.getArrivalTime());
-                    runningQueue.enqueue(process);
+                    if (process.getBurstTime1() == 0){
+                        process.setRunningProcessSituation(ProcessSituation.IO);
+                        process.setStartTime(counter);
+                        process.setFinishTime(counter + process.getIoTime());
+                        process.setLastUsed(counter + process.getIoTime());
+                        ioQueue.enqueue(process);
+                    } else {
+                        process.setRunningProcessSituation(ProcessSituation.CPU1);
+                        process.setStartTime(counter);
+                        process.setFinishTime(counter + process.getBurstTime1());
+                        process.setResponseTime(counter - process.getArrivalTime());
+                        process.setWaitingTime(counter - process.getArrivalTime());
+                        runningQueue.enqueue(process);
+                    }
                     break;
                 }
 
@@ -102,7 +117,6 @@ public class FCFSAndSJF extends AbstractBaseScheduler{
         }
 
         while (true) {
-
             // 1. adding to ready queue
             addingNewProcessesToReadyQueue(counter, algorithm);
 
@@ -115,7 +129,11 @@ public class FCFSAndSJF extends AbstractBaseScheduler{
             // 4. checking to run which CPU burst time
             checkWhichCpuBurstTimeToRun(counter, algorithm);
 
-            // 5. check if we have a running process or not
+            // 5. Double check for zero inputs in each iteration
+            checkIfIoIsFinished(counter, algorithm);
+            stopProcessOrEnterIo(counter);
+
+            // 6. check if we have a running process or not
             if (runningQueue.isEmpty())
                 idleTime++;
 

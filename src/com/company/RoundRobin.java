@@ -31,10 +31,18 @@ public class RoundRobin extends AbstractBaseScheduler{
 
                 switch (process.getRunningProcessSituation()) {
                     case CPU1 -> {
-                        process.setRunningProcessSituation(ProcessSituation.IO);
-                        process.setFinishTime(counter + process.getIoTime());
-                        process.setLastUsed(counter + process.getIoTime());
-                        ioQueue.enqueue(process);
+                        if (process.getIoTime() == 0){
+                            process.setRunningProcessSituation(ProcessSituation.CPU2);
+                            process.setRemainingWorkTime(process.getBurstTime2()-1);
+                            process.setWaitingTime(process.getWaitingTime() + counter - process.getLastUsed());
+                            process.setCurrentTimeQuantum(1); // because we count from 0 in our main loop
+                            runningQueue.enqueue(process);
+                        } else {
+                            process.setRunningProcessSituation(ProcessSituation.IO);
+                            process.setFinishTime(counter + process.getIoTime());
+                            process.setLastUsed(counter + process.getIoTime());
+                            ioQueue.enqueue(process);
+                        }
                         break;
                     }
                     case CPU2 -> {
@@ -90,22 +98,38 @@ public class RoundRobin extends AbstractBaseScheduler{
 
             switch (process.getRunningProcessSituation()) {
                 case FirstTime -> {
-                    process.setRunningProcessSituation(ProcessSituation.CPU1);
-                    process.setStartTime(counter);
-                    process.setRemainingWorkTime(process.getBurstTime1()-1);
-                    process.setResponseTime(counter - process.getArrivalTime());
-                    process.setWaitingTime(counter - process.getArrivalTime());
-                    process.setCurrentTimeQuantum(1); // because we count from 0 in our main loop
-                    runningQueue.enqueue(process);
+                    if (process.getBurstTime1() == 0) {
+                        process.setRunningProcessSituation(ProcessSituation.IO);
+                        process.setFinishTime(counter + process.getIoTime());
+                        process.setLastUsed(counter + process.getIoTime());
+                        process.setStartTime(counter);
+                        process.setResponseTime(counter - process.getArrivalTime());
+                        process.setWaitingTime(counter - process.getArrivalTime());
+                        ioQueue.enqueue(process);
+                    } else {
+                        process.setRunningProcessSituation(ProcessSituation.CPU1);
+                        process.setStartTime(counter);
+                        process.setRemainingWorkTime(process.getBurstTime1()-1);
+                        process.setResponseTime(counter - process.getArrivalTime());
+                        process.setWaitingTime(counter - process.getArrivalTime());
+                        process.setCurrentTimeQuantum(1); // because we count from 0 in our main loop
+                        runningQueue.enqueue(process);
+                    }
                     break;
                 }
 
                 case IO -> {
-                    process.setRunningProcessSituation(ProcessSituation.CPU2);
-                    process.setRemainingWorkTime(process.getBurstTime2()-1);
-                    process.setWaitingTime(process.getWaitingTime() + counter - process.getLastUsed());
-                    process.setCurrentTimeQuantum(1); // because we count from 0 in our main loop
-                    runningQueue.enqueue(process);
+                    if (process.getBurstTime2() == 0){
+                        process.setRunningProcessSituation(ProcessSituation.FINISHED);
+                        process.setEndTime(counter);
+                        finishedQueue.enqueue(process);
+                    } else {
+                        process.setRunningProcessSituation(ProcessSituation.CPU2);
+                        process.setRemainingWorkTime(process.getBurstTime2()-1);
+                        process.setWaitingTime(process.getWaitingTime() + counter - process.getLastUsed());
+                        process.setCurrentTimeQuantum(1); // because we count from 0 in our main loop
+                        runningQueue.enqueue(process);
+                    }
                     break;
                 }
 
@@ -142,7 +166,11 @@ public class RoundRobin extends AbstractBaseScheduler{
             // 4. checking to run which CPU burst time
             checkWhichCpuBurstTimeToRun(counter);
 
-            // 5. check if we have a running process or not
+            // 5. Double check for zero inputs in each iteration
+            checkIfIoIsFinished(counter);
+            checkWhichCpuBurstTimeToRun(counter);
+
+            // 6. check if we have a running process or not
             if (runningQueue.isEmpty())
                 idleTime++;
 
