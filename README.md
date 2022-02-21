@@ -15,10 +15,17 @@ The goal of this project is to implement the following scheduling algorithms:
     * **Second queue:** RoundRobin with time Quantum 16 ms.
     * **Third queue:** FirstComeFirstServed.
 
+Each process has five attributes:
+- **ID**
+- **Arrival Time**
+- **First Burst Time**
+- **IO Time**
+- **Second Burst Time**
+
 At the end, results should be analysed providing information such as waiting time, 
 response time, turn around time, cpu utilization, etc.
 
-**Note:** Test case are also provided at process_inputs.csv to check the results.
+**Note:** Test case are also provided in [*"process_inputs.csv"*](https://github.com/arlotfi79/OperatingSystems-Fall2021/blob/main/process_inputs.csv)   to check the results.
 ## Implementation
 The overall schema of a CPU scheduler is given below. 
 Regarding this schema we have implemented all algorithms and have illustrated the results using a table.
